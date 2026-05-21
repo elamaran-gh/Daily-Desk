@@ -95,7 +95,7 @@ const About = () => {
         </p>
 
         <div className="text-center mt-5">
-          <a href="https://github.com/thenileshnishad/dailydesk" target="_blank">
+          <a href="https://github.com/elamaran-gh/Daily-Desk" target="_blank">
             <button className="btn btn-primary">
               Explore the Code on GitHub
             </button>
