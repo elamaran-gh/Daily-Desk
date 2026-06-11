@@ -1,4 +1,4 @@
-const express = require("express");
+﻿const express = require("express");
 const app = express();
 require("dotenv").config();
 const connectDB = require("./config/database");
@@ -12,10 +12,12 @@ app.use(cors({ origin: process.env.FRONTEND_URL, credentials: true }));
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
 const entryRoutes = require("./routes/entryRoutes");
+const ragRoutes = require("./routes/ragRoutes");
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/entries", entryRoutes);
+app.use("/api/rag", ragRoutes);
 
 connectDB()
   .then(() => {

@@ -1,12 +1,14 @@
-import ModalLayout from "../ModalLayout";
+﻿import ModalLayout from "../ModalLayout";
 import { useEffect, useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import { useAddEntryMutation } from "../../redux/api/entriesApiSlice";
+import { useIndexEntryMutation } from "../../redux/api/ragApiSlice";
 import { toast } from "react-toastify";
 
 const AddEntry = () => {
   const [open, setOpen] = useState(false);
   const [addEntry, { isLoading }] = useAddEntryMutation();
+  const [indexEntry] = useIndexEntryMutation();
 
   const [formData, setFormData] = useState({
     title: "",
@@ -16,29 +18,32 @@ const AddEntry = () => {
   });
 
   useEffect(() => {
-    const initialData = {
+    setFormData({
       title: "",
       mood: "🙂",
       content: "",
       date: new Date().toISOString().slice(0, 10),
-    };
-    setFormData(initialData);
+    });
   }, [open]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    setFormData({ ...formData, [name]: value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const response = await addEntry(formData).unwrap();
+      const entryId = response.saveEntry._id;
       setOpen(false);
       toast.success(response.message);
+      try {
+        await indexEntry({ entryId }).unwrap();
+        console.log("Entry indexed:", entryId);
+      } catch {
+        console.warn("Entry saved but indexing failed.");
+      }
     } catch (error) {
       toast.error(error.data?.message || "An error occurred");
     }
@@ -55,15 +60,10 @@ const AddEntry = () => {
 
       <ModalLayout isOpen={open} close={() => setOpen(false)}>
         <div className="card-body">
-          <h2 className="card-title block text-center text-lg mb-2">
-            Add New Entry
-          </h2>
-
+          <h2 className="card-title block text-center text-lg mb-2">Add New Entry</h2>
           <form onSubmit={handleSubmit}>
             <div>
-              <label htmlFor="title">
-                Entry Title <span className="text-red-500">*</span>
-              </label>
+              <label htmlFor="title">Entry Title <span className="text-red-500">*</span></label>
               <input
                 type="text"
                 name="title"
@@ -75,12 +75,9 @@ const AddEntry = () => {
                 placeholder="Give your entry a title"
               />
             </div>
-
             <div className="flex gap-5 justify-center items-center">
               <div>
-                <label htmlFor="date">
-                  Select Date <span className="text-red-500">*</span>
-                </label>
+                <label htmlFor="date">Select Date <span className="text-red-500">*</span></label>
                 <input
                   type="date"
                   name="date"
@@ -90,12 +87,8 @@ const AddEntry = () => {
                   className="input rounded-lg my-3"
                 />
               </div>
-
               <div>
-                <label htmlFor="mood">
-                  Your Mood <span className="text-red-500">*</span>
-                </label>
-
+                <label htmlFor="mood">Your Mood <span className="text-red-500">*</span></label>
                 <select
                   name="mood"
                   id="mood"
@@ -109,11 +102,8 @@ const AddEntry = () => {
                 </select>
               </div>
             </div>
-
             <div>
-              <label htmlFor="content">
-                Describe Your Day <span className="text-red-500">*</span>
-              </label>
+              <label htmlFor="content">Describe Your Day <span className="text-red-500">*</span></label>
               <textarea
                 name="content"
                 id="content"
@@ -124,7 +114,6 @@ const AddEntry = () => {
                 placeholder="Write about your day, thoughts, or experiences"
               />
             </div>
-
             <button
               type="submit"
               className="btn btn-primary w-full rounded-lg mt-3"
@@ -138,4 +127,5 @@ const AddEntry = () => {
     </>
   );
 };
+
 export default AddEntry;
